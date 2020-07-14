@@ -1,35 +1,29 @@
-import React from 'react';
+//import axios from "axios";
+import React, { useState, useEffect } from "react";
+//import { getDisplayName } from "recompose";
 
 const withData = WrappedComponent => {
-  class WithData extends React.Component {
-    constructor(props) {
-      super(props);
+  const NewComponent = ({ dataSource, ...props }) => {
+    const [data, setData] = useState(null);
 
-      this.state = {
-        data: []
-      };
-    }
+      useEffect(() => {
+        fetch(dataSource)
+        .then(response => response.json())
+          .then(data => {
+            console.log(data);
+            setData(data);
+          });
+      }, []);
+ 
+    if (!data) return "Loading...";
 
-    componentDidMount() {
-      setTimeout(() => {
-        fetch(this.props.dataSource)
-          .then(response => response.json())
-          .then(data => this.setState({ data: data.slice(0, 3) }));
-      }, 1500);
-    }
+  
+    return <WrappedComponent {...props} data={data} />;
+  };
 
-    render() {
-      const { dataSource, ...otherProps } = this.props;
+  //NewComponent.displayName = `WithUserId(${getDisplayName(WrappedComponent)})`;
 
-      return this.state.data.length < 1 ? (
-        <h1>LOADING</h1>
-      ) : (
-        <WrappedComponent data={this.state.data} {...otherProps} />
-      );
-    }
-  }
-
-  return WithData;
+  return NewComponent;
 };
 
 export default withData;
